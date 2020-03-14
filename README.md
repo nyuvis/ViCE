@@ -1,6 +1,5 @@
 # ViCE: Visual Counterfactual Explanations for Machine Learning Models
 
-======================================================================
 
 `Oscar Gomez <https://github.com/oscargomezq/>`_, `Steffen Holter <https://github.com/5teffen/>`_, `Jun Yuan <https://github.com/junyuanjun/>`_, `Enrico Bertini <http://enrico.bertini.io/>`_
 
