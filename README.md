@@ -62,7 +62,7 @@ Various model types available for immediate training in real-time
 vice_explainer = vice.Vice(d,m, mode = "basic")
 
 # For more a more comprehensive tool select "full" mode. Note: this option can be time intensive
-vice_explainer = vice.Vice(d,m, mode = "fuull")
+vice_explainer = vice.Vice(d,m, mode = "full")
 
 ```
 To get a general feel for the ViCE tool it is sufficient to use "basic" mode. It is optimal for creating explanations with a few clicks. On the other hand, "full" mode uses data preprocessing to contextualize the individual explanations with regards to the rest of the samples in the dataset. For very large datasets, this can take a considerable amount of time, thus such data should ideally be sampled. (Coming soon: in built sampling)
@@ -73,7 +73,7 @@ Vice generates a visual explanation for the specified sample.
 
 ```python
 
-vice_explainer.gen_expl(sample_no = 1)
+vice_explainer.generate_explanation(sample_no = 1)
 
 ```
 
