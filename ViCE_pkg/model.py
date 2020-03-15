@@ -4,8 +4,8 @@ Model class requires the following parameters:
  - model element or model path OR target column (by default last one)
  - model framework
  	> scikit
- 	> tf (in development)
- 	> pytorch (in development)
+ 	> tf (coming soon)
+ 	> pytorch (coming soon)
 
 """
 
@@ -21,13 +21,14 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.linear_model import LogisticRegression
 
 import data
+import pickle
 
 
 
 class Model:
 
 
-	def __init__(self, model=None, model_path='', backend='scikit'):
+	def __init__(self, model=None, backend='scikit'):
 
 		# if((model is None) & (model_path == '')):
 		# 	raise ValueError("should provide either a trained model or the path to a model")
@@ -39,16 +40,15 @@ class Model:
 		
 		# tf and pytorch implementation coming soon
 
-		self.__init__(model, model_path, backend)
+		self.__init__(model, backend)
 
 
 
 
 class ModelScikit:
 
-	def __init__(self, model=None, model_path='', backend='scikit'):
+	def __init__(self, model=None, backend='scikit'):
 		self.model = model
-		self.model_path = model_path
 		self.backend = backend
 
 
@@ -100,8 +100,8 @@ class ModelScikit:
 			raise ModelError("Model incomplete")
 
 
-	def load_model(self):
-		if self.model_path != '':
+	def load_model(self, model_path):
+		if model_path != '':
 			self.model = pickle.load(open(model_path, 'rb'))
 		else:
 			raise ModelError("No model path provided")
@@ -117,16 +117,6 @@ class ModelScikit:
 
 	def run_model_data(self, data_set):
 		pass
-		# if (not self.model):
-		# 	raise ModelError("Train Model First")
-
-		# for i in range(data_set.shape[0]):
-		# 	data_set[i] = self.__scaled_row(data_set[i])
-
-		# pred = self.model.predict(data_set)
-		# self.model_calls += data_set.shape[0]
-		# return pred
-
 
 	def model_complete(self): 
 		return (model != None)
@@ -135,6 +125,63 @@ class ModelScikit:
 		print("Test Accuracy: ")
 		print("Training Accuracy: ")
 
+
+
+class ModelTF:
+
+	def __init__(self, model=None, backend='scikit'):
+		self.model = model
+		self.backend = backend
+
+	def train_model(self, data, type = 'svm'):
+		pass
+
+	def save_model(self, out_path):
+		pass
+
+
+	def load_model(self, model_path):
+		pass
+
+	def run_model(self, sample):
+		pass
+
+	def run_model_data(self, data_set):
+		pass
+
+	def model_complete(self): 
+		pass
+
+	def model_performance(self):
+		pass
+
+class ModelPytorch:
+
+	def __init__(self, model=None, backend='scikit'):
+		self.model = model
+		self.backend = backend
+
+	def train_model(self, data, type = 'svm'):
+		pass
+
+	def save_model(self, out_path):
+		pass
+
+
+	def load_model(self, model_path):
+		pass
+
+	def run_model(self, sample):
+		pass
+
+	def run_model_data(self, data_set):
+		pass
+
+	def model_complete(self): 
+		pass
+
+	def model_performance(self):
+		pass
 		
 	
 
