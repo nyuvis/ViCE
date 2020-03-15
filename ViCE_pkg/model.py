@@ -107,15 +107,12 @@ class ModelScikit:
 			raise ModelError("No model path provided")
 
 
-
-	def run_model(self, input_tensor):
+	def run_model(self, sample):
 		if (not self.model):
 			raise ModelError("Model incomplete")
 
 		result = self.model.predict_proba(sample.reshape(1, -1))
 		return result[0][1]
-
-
 
 
 	def run_model_data(self, data_set):
@@ -131,6 +128,12 @@ class ModelScikit:
 		# return pred
 
 
+	def model_complete(self): 
+		return (model != None)
+
+	def model_performance(self):
+		print("Test Accuracy: ")
+		print("Training Accuracy: ")
 
 		
 	
