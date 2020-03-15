@@ -16,4 +16,9 @@ ViCE requires the following packages:
 
 Getting started
 -------------------------
+```python
+s = "Python syntax highlighting"
+print s
+```
+
 
