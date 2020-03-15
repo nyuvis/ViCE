@@ -17,8 +17,45 @@ ViCE requires the following packages:
 Getting started
 -------------------------
 ```python
-s = "Python syntax highlighting"
-print s
+import vice
+
+# Initialize own local dataset
+path = "~/diabetes.csv"
+d = vice.Data(path)
+
+# Initialize example dataset
+#   "diabetes": diabetes dataset
+#   "grad": graduate admissions dataset
+
+d = vice.Data(example = "grad")
+
+```
+Advanced parameters for custom dataset initialization include
+* :param data: 
+* :param target: target column index (by default -1)
+* :param exception: non-actionable feature column index list
+* :param categorical: categorical feature column index list
+
+
+```python
+# Load pre-trained model 
+
+
+
+# Train using initialized dataset
+
+```
+
+
+
+
+
+
+
+
+
+
+
 ```
 
 
