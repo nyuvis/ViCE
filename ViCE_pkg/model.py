@@ -29,17 +29,17 @@ class Model:
 
 
 	def __init__(self, model=None, backend='scikit'):
-
-		# if((model is None) & (model_path == '')):
-		# 	raise ValueError("should provide either a trained model or the path to a model")
-
-		# else:
-
 		if (backend == 'scikit'):
 			self.__class__  = ModelScikit
 		
 		# tf and pytorch implementation coming soon
+		elif (backend == 'tf'):
+			self.__class__  = ModelTF
 
+		elif (backend == 'pytorch'):
+			self.__class__  = ModelPytorch
+
+		
 		self.__init__(model, backend)
 
 
@@ -124,6 +124,8 @@ class ModelScikit:
 	def model_performance(self):
 		print("Test Accuracy: ")
 		print("Training Accuracy: ")
+
+
 
 
 
