@@ -28,23 +28,31 @@ d = vice.Data(path)
 #   "grad": graduate admissions dataset
 
 d = vice.Data(example = "grad")
-
 ```
 Advanced parameters for custom dataset initialization include
-* :param data: 
+* :param data: preloaded data array with first row as feature names
 * :param target: target column index (by default -1)
 * :param exception: non-actionable feature column index list
 * :param categorical: categorical feature column index list
 
 
 ```python
-# Load pre-trained model 
+# Initialize pre-trained model
+m = vice.Model(model, backend = "scikit")
+
+# Load model from path
+model_path = "~/diabetes_svm.sav"
+m = vice.Model().load_model(model_path)
 
 
-
-# Train using initialized dataset
-
+# Train a model using initialized dataset
+d = vice.Data(example = "diabetes")
+m = vice.Model()
+m.train_model(d, type='svm')
 ```
+
+Model allows backend specification ("scikit", coming soon: "tf", "pytorch"). 
+
 
 
 
