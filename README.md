@@ -47,23 +47,19 @@ m = vice.Model().load_model(model_path)
 
 # Train a model using initialized dataset
 d = vice.Data(example = "diabetes")
-m = vice.Model()
-m.train_model(d, type='svm')
+m = vice.Model().train_model(d, type='svm')
 ```
 
 Model allows backend specification ("scikit", coming soon: "tf", "pytorch"). 
+Various model types available for immediate training in real-time
+* "svm": support vector machines
+* "rf": random forests
+* "lg": logistic regression
 
 
-
-
-
-
-
-
-
-
-
+```python
+# Initialize counter factual explanation visualiser
+vice = vice.Vice(d,m)
 
 ```
-
 
