@@ -1,7 +1,7 @@
 """
 
 Data class requires the following parameters:
- - .csv path OR data array (with feature names)
+ - .csv path OR pandas dataframe (with feature names)
  - target column (by default last one)
  - non-actionable feature columns (index list)
  - categorical feautre columns (index list)
@@ -51,14 +51,14 @@ class Data:
 
 
 			else:
-				all_data = np.array(data)
-				self.feature_names = all_data[0]  # Feature names should be first row
+				all_data = np.array(data.values)
+				self.feature_names = np.array(data.columns)[:-1]
 
 
 		# -- Split data and target values --
-		self.target = all_data[:,target]
-		self.data = np.delete(all_data, target, 1)
-		self.no_samples, self.no_features = self.data.shape
+		self.y = all_data[:,target]
+		self.X = np.delete(all_data, target, 1)
+		# self.no_samples, self.no_features = self.data.shape
 
 		# -- Specifying exceptions & categoricals --
 		self.ex = exception

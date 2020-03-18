@@ -8,127 +8,67 @@ from global_explanations import *
 from d3_functions import *
 
 
-
 class Vice:
 
-    def __init__(self, data, model, mode = "basic", no_bins = 10):
+    def __init__(self, data, model, no_bins = 10):
 
         self.data = data
         self.model = model
-        self.mode = mode
+
         self.no_bins = no_bins
 
-
-        # --- Advanced Parameters
+        # --- Advanced Parameters --- 
         density_fineness = 100
 
 
-        # bins_centred, X_pos_array, init_vals, col_ranges = divide_data_bins(data,no_bins)  
+        # --- Useful tracking variables --- 
+        self.X = self.data.X
+        self.y = self.data.y
+        self.no_samples, self.no_features = self.data.X.shape
+
+
+        # --- Data splitting --- 
+        self.bins_centred, self.X_pos_array, self.init_vals, self.col_ranges = divide_data_bins(self.X, self.no_bins)  # Note: Does not account for categorical features
+
+
 
 
 
     def generate_explanation(self, index):
-        pass
+        sample_row = self.X[index]
+
+
+        # change_vector, change_row, anchors, percent = self.instance_explanation(svm_model, data, data[sample_no], sample_no, X_pos_array, bins_centred, 
+        #                                 no_bins, monotonicity_arr, col_ranges)
+
+
+        # change_vector, change_row, anchors, percent = instance_explanation(svm_model, data, data[sample_no], sample_no, X_pos_array, bins_centred, 
+        #                                 no_bins, monotonicity_arr, col_ranges)
+
+
+        instance_explanation(data, data[sample_no], sample_no, X_pos_array, bins_centred, no_bins, monotonicity_arr, col_ranges)
 
 
 
+    def __instance_explanation(self, k_row, row_idx, X_bin_pos, mean_bins, no_bins, mono_arr, col_ranges, keep_top=1, threshold=True, locked_fts=[]):
 
-
-
-
-
-    def __evaluate_data_set(self, data):
-        no_features = data.shape[1]
-        avg_list = []
-        std_list = []
-        for i in range(no_features):
-            current_col = data[:,i].flatten()
-            std_list.append(np.std(current_col))
-            avg_list.append(np.mean(current_col))
-              
-        return avg_list, std_list
-
-    def __perturb_special(self, min_val,max_val,avg,std,no_val):  # Dealing with categorical features
-        new_col = np.random.normal(avg, std, no_val)
-        # Note: these functions have poor time complexity
-        np.place(new_col,new_col < min_val, min_val)
-        np.place(new_col,new_col > max_val, max_val)
-        new_col = new_col.round(0)
-        return new_col
-        
-    def __find_anchors(self, model, data_set, sample, no_val, special_cols = []):
-        # Special Cols account for the categorical columns
-
-        # --- Hardcoded Parameters --- 
-        iterations = 4   # Iterations allowed
-        
-
-        # --- Manually ---  # Dealing with categoricals. Assigning category range. 
-        lowest_category = 0
-        highest_category = 7
+        initial_percentage = self.model.run_model(k_row)
 
         
-        features = sample.shape[0]
-        avg_list, std_list = evaluate_data_set(data_set)
 
-        # Precision Treshold
-        treshold = 0.95
-        
-        # Identify original result from sample
-        initial_percentage = model.run_model(sample)
-        decision = np.round(initial_percentage,0)
-
-        # Create empty mask 
-        mask = np.zeros(features)
-        
-        # Allows tracking the path
-        locked = []
+        change_vector, change_row = find_MSC(self.X k_row, row_idx, X_bin_pos, mean_bins, no_bins, mono_arr, col_ranges, keep_top, threshold, locked_fts)
+   
+        # anchors = find_anchors(data, k_row, 100)
 
 
-        while (iterations > 0):
-            # Retains best result and the corresponding index
-            max_ind = (0,0)
-
-            # Assign column that is being tested
-            for test_col in range(features):
-                new_data = np.empty([features, no_val])
-
-                # Perturb data
-                for ind in range(features):
-                    if (ind == test_col) or (ind in locked):
-                        new_data[ind] = np.array(np.repeat(sample[ind],no_val))
-                    else:
-                        if (ind in special_cols):
-
-                            new_data[ind] = perturb_special(lowest_category,highest_category,avg_list[ind],std_list[ind],no_val)
-                        else:
-                            new_data[ind] = np.random.normal(avg_list[ind], std_list[ind], no_val)
-
-                
-                new_data = new_data.transpose()
+        # Find MSC can return a list of change vectors and a list of change rows
+        # They can be kept in memory and then passed to D3 functions as necessary.
 
 
-                # Run Model 
-                pred = model.run_model_data(new_data)
-                acc = (np.mean(pred == decision))
-                
-                if (acc > max_ind[0]):
-                    max_ind = (acc,test_col)
-                    
+        return change_vector[0], change_row[0], anchors
 
-            locked.append(max_ind[1])
-                
-            for n in locked:
-                mask[n] = 1
-                
-            if (max_ind[0] >= treshold):
-                return mask
-            iterations -= 1
-            
-        # print("!!! No anchors found !!!")
-        return None
 
-    def __perturb_row_feature(self, model, row, row_idx, feat_idx, current_bins, X_bin_pos, mean_bins, mono_arr, improve, no_bins, col_ranges):
+    def __perturb_row_feature(self, row, row_idx, feat_idx, current_bins, X_bin_pos, mean_bins, mono_arr, improve, no_bins, col_ranges):
         
         monot_arr = np.copy(mono_arr)                        
         
@@ -174,8 +114,8 @@ class Vice:
             row_down = np.copy(row)
             row_up[feat_idx] = next_value
             row_down[feat_idx] = prev_value
-            percent_up = model.run_model(row_up)
-            percent_down = model.run_model(row_down)
+            percent_up = self.model.run_model(row_up)
+            percent_down = self.model.run_model(row_down)
             if percent_up >= percent_down:
                 if improve:
                     c_current_bins[feat_idx] += 1
@@ -210,7 +150,7 @@ class Vice:
         else:
             return False
 
-    def __find_MSC (self, model, data, k_row, row_idx, X_bin_pos, mean_bins, no_bins, monotonicity_arr, col_ranges, keep_top, threshold, locked_fts):
+    def __find_MSC (self, data, k_row, row_idx, X_bin_pos, mean_bins, no_bins, monotonicity_arr, col_ranges, keep_top, threshold, locked_fts):
 
         # --- Hardcoded Parameters --- 
         no_vertical_movement = 5
@@ -218,7 +158,7 @@ class Vice:
 
         no_features = k_row.shape[0]
         orig_row = np.copy(k_row)
-        orig_percent = model.run_model(orig_row)
+        orig_percent = self.model.run_model(orig_row)
         orig_moving_fts = np.nonzero(np.array( [1 if not (i in locked_fts) else 0 for i in range(no_features)] ))[0].tolist()
 
         original_bins = bin_single_sample(orig_row, col_ranges)
@@ -284,10 +224,10 @@ class Vice:
                 for i in top_moving_fts[j]:
                     # t_row, t_current_bins = perturb_row_feature2(model, top_rows[j], row_idx, i, top_current_bins[j], X_bin_pos, mean_bins, monotonicity_arr, improve, no_bins, col_ranges)
                     # print(monotonicity_arr)
-                    t_row, t_current_bins = perturb_row_feature(model, top_rows[j], row_idx, i, top_current_bins[j], X_bin_pos, mean_bins, monotonicity_arr, improve, no_bins, col_ranges)
+                    t_row, t_current_bins = perturb_row_feature(top_rows[j], row_idx, i, top_current_bins[j], X_bin_pos, mean_bins, monotonicity_arr, improve, no_bins, col_ranges)
 
                     new_rows.append(t_row)
-                    new_percents.append(model.run_model(t_row))
+                    new_percents.append(self.model.run_model(t_row))
                     new_curr_bins.append(t_current_bins)
 
                 new_rows = np.array(new_rows)
@@ -355,41 +295,109 @@ class Vice:
             else:
                 return np.tile(np.zeros(no_features), (keep_top,1)),np.tile(orig_row, (keep_top,1))
 
-    def __instance_explanation(self, model, data, k_row, row_idx, X_bin_pos, mean_bins, no_bins, mono_arr, col_ranges, keep_top=1, threshold=True, locked_fts=[]):
+
+
+
+
+
+
+
+
+
+
+
+    def __evaluate_data_set(self):
+        avg_list = []
+        std_list = []
+        for i in range(self.no_features):
+            current_col = self.X[:,i].flatten()
+            std_list.append(np.std(current_col))
+            avg_list.append(np.mean(current_col))
+              
+        return avg_list, std_list
+
+
+    def __perturb_special(self, min_val, max_val, avg, std, no_val):  # Dealing with categorical features
+        new_col = np.random.normal(avg, std, no_val)
+        # Note: these functions have poor time complexity
+        np.place(new_col,new_col < min_val, min_val)
+        np.place(new_col,new_col > max_val, max_val)
+        new_col = new_col.round(0)
+        return new_col
+
+
+    def __find_anchors(self, sample, no_val):
+        # Special Cols account for the categorical columns
+
+        # --- Hardcoded Parameters --- 
+        iterations = 4   # Iterations allowed
         
-        # -- Toggle this for Print statements -- 
-        printing = False
 
+        # --- Manually ---  # Dealing with categoricals. Assigning category range. 
+        lowest_category = 0
+        highest_category = 7
 
-        np.random.seed(11)
-
-        # --- To measure performance ---
-        model.model_calls = 0
-
-        initial_percentage = model.run_model(k_row)
-
-        try:
-            change_vector, change_row = find_MSC(model, data, k_row, row_idx, X_bin_pos, mean_bins, no_bins, mono_arr, col_ranges, keep_top, threshold, locked_fts)
-        except:
-            change_vector, change_row = np.tile(np.zeros(k_row.shape[0]), (keep_top,1)),np.tile(k_row, (keep_top,1))
-
-        anchors = find_anchors(model, data, k_row, 100)
-
-
-        if printing:
-            print("Model calls for this explanation:", model.model_calls)
-            print(change_vector)
-            print(change_row)
-            print(anchors)
         
+        features = sample.shape[0]
+        avg_list, std_list = evaluate_data_set(data_set)
 
-        # Find MSC can return a list of change vectors and a list of change rows
-        # They can be kept in memory and then passed to D3 functions as necessary.
-
-        if keep_top>1:
-            return change_vector, change_row, anchors, initial_percentage
+        # Precision Treshold
+        treshold = 0.95
         
-        else:
-            return change_vector[0], change_row[0], anchors, initial_percentage
+        # Identify original result from sample
+        initial_percentage = self.model.run_model(sample)
+        decision = np.round(initial_percentage,0)
 
+        # Create empty mask 
+        mask = np.zeros(features)
+        
+        # Allows tracking the path
+        locked = []
+
+
+        while (iterations > 0):
+            # Retains best result and the corresponding index
+            max_ind = (0,0)
+
+            # Assign column that is being tested
+            for test_col in range(features):
+                new_data = np.empty([features, no_val])
+
+                # Perturb data
+                for ind in range(features):
+                    if (ind == test_col) or (ind in locked):
+                        new_data[ind] = np.array(np.repeat(sample[ind],no_val))
+                    else:
+                        if (ind in self.data.ex):
+
+                            # SPECIAL CASE: non-actionable features
+
+                        else:
+                            new_data[ind] = np.random.normal(avg_list[ind], std_list[ind], no_val)
+
+                
+                new_data = new_data.transpose()
+
+
+                # Run Model 
+                pred = self.model.run_model_data(new_data)
+                acc = (np.mean(pred == decision))
+                
+                if (acc > max_ind[0]):
+                    max_ind = (acc,test_col)
+                    
+
+            locked.append(max_ind[1])
+                
+            for n in locked:
+                mask[n] = 1
+                
+            if (max_ind[0] >= treshold):
+                return mask
+            iterations -= 1
+            
+        # print("!!! No anchors found !!!")
+        return None
+
+        
 
