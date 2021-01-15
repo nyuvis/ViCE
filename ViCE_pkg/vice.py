@@ -2,10 +2,10 @@
 
 import pandas as pd
 import numpy as np
-from model import *
-from utils import *
-from global_explanations import *
-from d3_functions import *
+from .model import *
+from .utils import *
+# from global_explanations import *
+# from d3_functions import *
 
 
 class Vice:
@@ -34,9 +34,9 @@ class Vice:
 
 
 
-    def generate_explanation(self, index):
-        sample_row = self.X[index]
-
+    def generate_explanation(self, sample_no):
+        sample_row = self.X[sample_no]
+        monotonicity_arr = mono_finder(self.model, self.X, self.col_ranges)
 
         # change_vector, change_row, anchors, percent = self.instance_explanation(svm_model, data, data[sample_no], sample_no, X_pos_array, bins_centred, 
         #                                 no_bins, monotonicity_arr, col_ranges)
@@ -46,7 +46,7 @@ class Vice:
         #                                 no_bins, monotonicity_arr, col_ranges)
 
 
-        instance_explanation(data, data[sample_no], sample_no, X_pos_array, bins_centred, no_bins, monotonicity_arr, col_ranges)
+        return self.__instance_explanation(self.X[sample_no], sample_no, self.X_pos_array, self.bins_centred, self.no_bins, monotonicity_arr, self.col_ranges)
 
 
 
@@ -56,7 +56,7 @@ class Vice:
 
         
 
-        change_vector, change_row = find_MSC(self.X k_row, row_idx, X_bin_pos, mean_bins, no_bins, mono_arr, col_ranges, keep_top, threshold, locked_fts)
+        change_vector, change_row = self.__find_MSC(self.X, k_row, row_idx, X_bin_pos, mean_bins, no_bins, mono_arr, col_ranges, keep_top, threshold, locked_fts)
    
         # anchors = find_anchors(data, k_row, 100)
 
@@ -65,7 +65,8 @@ class Vice:
         # They can be kept in memory and then passed to D3 functions as necessary.
 
 
-        return change_vector[0], change_row[0], anchors
+        return change_vector[0], change_row[0]
+        # return change_vector[0], change_row[0], anchors
 
 
     def __perturb_row_feature(self, row, row_idx, feat_idx, current_bins, X_bin_pos, mean_bins, mono_arr, improve, no_bins, col_ranges):
@@ -191,7 +192,7 @@ class Vice:
         top_moving_fts = [orig_moving_fts for i in range(keep_top)]
 
         # Loop while best changed row not above threshold
-        while percent_cond(improve, top_percents[0]):
+        while self.__percent_cond(improve, top_percents[0]):
 
             poss_top_rows = []
             poss_top_percents = []
@@ -224,7 +225,7 @@ class Vice:
                 for i in top_moving_fts[j]:
                     # t_row, t_current_bins = perturb_row_feature2(model, top_rows[j], row_idx, i, top_current_bins[j], X_bin_pos, mean_bins, monotonicity_arr, improve, no_bins, col_ranges)
                     # print(monotonicity_arr)
-                    t_row, t_current_bins = perturb_row_feature(top_rows[j], row_idx, i, top_current_bins[j], X_bin_pos, mean_bins, monotonicity_arr, improve, no_bins, col_ranges)
+                    t_row, t_current_bins = self.__perturb_row_feature(top_rows[j], row_idx, i, top_current_bins[j], X_bin_pos, mean_bins, monotonicity_arr, improve, no_bins, col_ranges)
 
                     new_rows.append(t_row)
                     new_percents.append(self.model.run_model(t_row))
@@ -286,7 +287,7 @@ class Vice:
                 break
         
         # print(top_percents)
-        if not percent_cond(improve, top_percents[0]):
+        if not self.__percent_cond(improve, top_percents[0]):
             return top_change_vectors[:keep_top], top_rows[:keep_top]
         else:
             # print("Decision can't be moved within thresholds:")
@@ -371,6 +372,7 @@ class Vice:
                         if (ind in self.data.ex):
 
                             # SPECIAL CASE: non-actionable features
+                             new_data[ind] =  new_data[ind]
 
                         else:
                             new_data[ind] = np.random.normal(avg_list[ind], std_list[ind], no_val)

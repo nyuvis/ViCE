@@ -1,3 +1,3 @@
 from .data import Data
-from .model import Model
+from .model import ModelScikit
 from .vice import Vice

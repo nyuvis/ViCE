@@ -20,7 +20,7 @@ from sklearn import svm
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.linear_model import LogisticRegression
 
-import data
+# import data
 import pickle
 
 
@@ -62,8 +62,10 @@ class ModelScikit:
 		"""
 
 		rand_state = 0
-		X = data.data
-		y = data.target
+		# X = data.data
+		# y = data.target
+		X = data.X
+		y = data.y
 
 		# -- Needs to be retained for inserting new samples -- # Incomplete
 		# scaler = StandardScaler()
@@ -90,6 +92,7 @@ class ModelScikit:
 
 		else:
 			raise ModelError("Unknown model type selected")
+		return self
 
 
 	def save_model(self, out_path):
